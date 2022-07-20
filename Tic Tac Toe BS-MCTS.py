@@ -333,7 +333,11 @@ def search(belief, node):
         return reward
     
     if (node.children == []):
-        expansion(belief, node)
+        if not belief.is_game_over(belief.board):
+            expansion(belief, node)
+        else:
+            return belief.game_result(belief.board, node.color)
+            
     node.visits += 1    
     belief.visits += 1
     action = selection(belief, node)
@@ -374,7 +378,7 @@ def selection(belief, node):
         action = maxNodeRewardEstimation(node,belief)
         
     else:
-        action = roulette_wheel_selection(node.beliefs)
+        action = roulette_wheel_selection(get_action_scores(node))
         
     return action
 
@@ -398,14 +402,30 @@ def nodeRewardEstimation(node,action):
     NBa = actionVisits(node, action)
     return U + exploration * math.sqrt(lnN / NBa)
 
-def roulette_wheel_selection(beliefs):
-    maximum = sum(belief.probability for belief in beliefs)
+
+
+def get_action_scores(node):
+    
+    action_scores = []
+    for c in node.children:
+        action = c.parent_action
+        U = actionReward(node,action)
+        lambada = 0.7
+        score = math.exp(U * lambada)
+        
+        action_scores.append([action, score])
+        
+    return action_scores
+        
+
+def roulette_wheel_selection(actions):
+    maximum = sum(action[1] for action in actions)
     pick = random.uniform(0, maximum)
     current = 0
-    for belief in beliefs:
-        current += belief.probability
+    for action in actions:
+        current += action[1]
         if current > pick:
-            return belief
+            return action[0]
     
 class Belief():
     
