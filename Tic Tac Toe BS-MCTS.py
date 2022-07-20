@@ -282,12 +282,22 @@ def BSMCTS(root_node, max_samples, max_iterations):
 
 def expansion(belief, node):
     
-    belief.visits = 0
     
     for action in belief.actions():
-        new_node = nodeTakeAction(node, action)
-        if new_node not in node.children:
+        
+        if action not in [c.parent_action for c in node.children]:
+            new_node = nodeTakeAction(node, action)
             node.children.append(new_node)
+            
+        else:
+            for c in node.children:
+                if c.parent_action == action:
+                    action_node = c
+                    break
+                
+            new_belief = beliefTakeAction(belief, action)
+            if new_belief not in action_node.beliefs:
+                action_node.beliefs.append(new_belief)
             
 
 """
@@ -345,6 +355,7 @@ def search(belief, node):
     for c in node.children:
         if c.parent_action == action:
             node_to_search = c
+            break
     
     reward = -1 * search(beliefTakeAction(belief, action), node_to_search)
     
