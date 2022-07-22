@@ -289,15 +289,15 @@ def expansion(belief, node):
             new_node = nodeTakeAction(node, action)
             node.children.append(new_node)
             
-        else:
-            for c in node.children:
-                if c.parent_action == action:
-                    action_node = c
-                    break
-                
-            new_belief = beliefTakeAction(belief, action)
-            if new_belief not in action_node.beliefs:
-                action_node.beliefs.append(new_belief)
+
+        for c in node.children:
+            if c.parent_action == action:
+                action_node = c
+                break
+            
+        new_belief = beliefTakeAction(belief, action)
+        if new_belief not in action_node.beliefs:
+            action_node.beliefs.append(new_belief)
             
 
 """
@@ -346,7 +346,8 @@ def search(belief, node):
         if not belief.is_game_over(belief.board):
             expansion(belief, node)
         else:
-            return belief.game_result(belief.board, node.color)
+            #print("TERMINAL NODE!")
+            return 100* belief.game_result(belief.board, node.color)
             
     node.visits += 1    
     belief.visits += 1
